@@ -58,6 +58,8 @@ route.get('/kosh/:Letter', limiter.rate100, kosh.letter);
 
 route.get('/kosh/word/:Word', limiter.rate100, kosh.word);
 
+route.get('/kosh/word/search/:query', limiter.rate100, kosh.wordSearch);
+
 route.get('/kosh/search/:query', limiter.rate100, kosh.search);
 
 // Rehat Routes

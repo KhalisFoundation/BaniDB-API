@@ -346,6 +346,26 @@
         }
       }
     },
+    "/kosh/word/search/{query}": {
+      "get": {
+        "summary": "Kosh Search by word",
+        "description": "Get words in kosh table by query on words only.",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "path",
+            "description": "query to search on",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          }
+        }
+      }
+    },
     "/kosh/search/{query}": {
       "get": {
         "summary": "Kosh Search",

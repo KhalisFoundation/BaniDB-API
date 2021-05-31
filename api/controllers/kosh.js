@@ -45,9 +45,57 @@ exports.word = async (req, res) => {
   }
 };
 
+exports.wordSearch = async (req, res) => {
+  let conn;
+  const query = `${req.params.query}`;
+  const match = `%${query}%`;
+  const fullMatch = `${query}`;
+  const startMatch = `${query}%`;
+  const endMatch = `%${query}`;
+  try {
+    conn = await req.app.locals.pool.getConnection();
+    const q = `SELECT w.ID AS id, w.Word AS word, w.WordUni AS wordUni,
+                  d.DefGurmukhi AS definition, d.DefGurmukhiUni AS definitionUni
+                FROM MahanKoshWords w
+                LEFT JOIN MahanKoshDefinitions d ON w.Definition = d.ID
+                WHERE
+                  w.Word LIKE ? OR
+                  w.WordUni LIKE BINARY ?
+                ORDER BY 
+                  CASE
+                    WHEN word LIKE ? THEN 1
+                    WHEN wordUni LIKE ? THEN 1
+                    WHEN word LIKE ? THEN 2
+                    WHEN wordUni LIKE ? THEN 2
+                    WHEN word LIKE ? THEN 3
+                    WHEN wordUni LIKE ? THEN 3
+                    ELSE 4
+                  END`;
+    const rows = await conn.query(q, [
+      match,
+      match,
+      fullMatch,
+      fullMatch,
+      startMatch,
+      startMatch,
+      endMatch,
+      endMatch,
+    ]);
+    res.json(rows);
+  } catch (err) {
+    lib.error(err, res, 500);
+  } finally {
+    if (conn) conn.end();
+  }
+};
+
 exports.search = async (req, res) => {
   let conn;
-  const query = `%${req.params.query}%`;
+  const query = `${req.params.query}`;
+  const match = `%${query}%`;
+  const fullMatch = `${query}`;
+  const startMatch = `${query}%`;
+  const endMatch = `%${query}`;
   try {
     conn = await req.app.locals.pool.getConnection();
     const q = `SELECT w.ID AS id, w.Word AS word, w.WordUni AS wordUni,
@@ -59,8 +107,40 @@ exports.search = async (req, res) => {
                   w.WordUni LIKE BINARY ? OR
                   d.DefGurmukhi LIKE ? OR
                   d.DefGurmukhiUni LIKE BINARY ?
-                ORDER BY w.ID`;
-    const rows = await conn.query(q, [query, query, query, query]);
+                ORDER BY 
+                  CASE
+                    WHEN word LIKE ? THEN 1
+                    WHEN wordUni LIKE ? THEN 1
+                    WHEN word LIKE ? THEN 2
+                    WHEN wordUni LIKE ? THEN 2
+                    WHEN word LIKE ? THEN 3
+                    WHEN wordUni LIKE ? THEN 3
+                    WHEN definition LIKE ? THEN 4
+                    WHEN definitionUni LIKE ? THEN 4
+                    WHEN definition LIKE ? THEN 5
+                    WHEN definitionUni LIKE ? THEN 5
+                    WHEN definition LIKE ? THEN 6
+                    WHEN definitionUni LIKE ? THEN 6
+                    ELSE 7
+                  END`;
+    const rows = await conn.query(q, [
+      match,
+      match,
+      match,
+      match,
+      fullMatch,
+      fullMatch,
+      startMatch,
+      startMatch,
+      endMatch,
+      endMatch,
+      fullMatch,
+      fullMatch,
+      startMatch,
+      startMatch,
+      endMatch,
+      endMatch,
+    ]);
     res.json(rows);
   } catch (err) {
     lib.error(err, res, 500);
