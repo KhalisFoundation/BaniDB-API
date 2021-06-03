@@ -102,7 +102,8 @@ exports.search = async (req, res) => {
 
   if (searchQuery) {
     if (searchType === 0) {
-      // First letter start
+      // First letter start=> {
+      // }
       const queryObj = lib.searchOperators.firstLetterStartToQuery(
         charCodeQuery,
         charCodeQueryWildCard,
@@ -621,4 +622,24 @@ const getNavigation = async (req, res, type, first, last, source = '') => {
     if (conn) conn.end();
   }
   return {};
+};
+
+exports.updates = async (req, res) => {
+  let conn;
+  const { Date } = req.params;
+
+  try {
+    conn = await req.app.locals.pool.getConnection();
+
+    if (!Date) res.json({ error: 'please enter valid date' });
+    const query = `SELECT COUNT(*) FROM Verse WHERE Updated >= '${Date}'`;
+
+    const dbCount = await conn.query(query);
+
+    res.json({ updatedVerses: dbCount[0]['COUNT(*)'] });
+  } catch (err) {
+    lib.error(err, res, 500);
+  } finally {
+    if (conn) conn.end();
+  }
 };
